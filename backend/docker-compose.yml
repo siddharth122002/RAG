@@ -1,0 +1,11 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    container_name: "redis-server"
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    container_name: "qdrantdb"
