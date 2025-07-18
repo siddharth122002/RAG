@@ -118,6 +118,10 @@ app.post("/chat", async (req, res) => {
     console.log("---err", e);
   }
 });
-app.listen(4000, () => {
+
+app.get("/ping", (req, res) => {
+  res.send({ msg: "alive" });
+});
+app.listen(process.env.PORT, () => {
   console.log("listening");
 });
