@@ -4,6 +4,16 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { CohereEmbeddings } from "@langchain/cohere";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { QdrantVectorStore } from "@langchain/qdrant";
+import fs from "fs";
+import IORedis from "ioredis";
+import dotenv from "dotenv";
+dotenv.config();
+const connection = new IORedis(process.env.UPSTASH, {
+  maxRetriesPerRequest: null,
+  enableOfflineQueue: false,
+  lazyConnect: true,
+  tls: {},
+});
 const worker = new Worker(
   "pdfQueue",
   async (job) => {
@@ -24,12 +34,11 @@ const worker = new Worker(
 
       const embeddings = new CohereEmbeddings({
         model: "embed-english-v3.0",
-        apiKey: "0CA0wZXtOBsjPQ4X6IcEQyReKzv2t8axCcZG8OZq",
+        apiKey: process.env.COHERE,
       });
       const client = new QdrantClient({
-        url: "http://localhost:6333",
-        apiKey:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.dTPTnqmFZrVWfT1Y4SwqwA7awZQa3mQfjWO4srdueBA",
+        url: process.env.QDRANT_URL,
+        apiKey: process.env.QDRANT_KEY,
       });
 
       const vectorStore = await QdrantVectorStore.fromDocuments(
@@ -40,15 +49,13 @@ const worker = new Worker(
           collectionName: "pdf-collection",
         }
       );
+      fs.unlinkSync(data.path);
     } catch (err) {
       console.error("❌ PDF load failed:", err);
     }
   },
   {
     concurrency: 100,
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
+    connection,
   }
 );

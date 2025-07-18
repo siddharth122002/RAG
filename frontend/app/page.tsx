@@ -37,6 +37,10 @@ const App: React.FC = () => {
   };
 
   const handleSend = async () => {
+    if (files.length === 0) {
+      alert("Please upload a PDF before chatting.");
+      return;
+    }
     const id = localStorage.getItem("uniqueId");
 
     if (!input.trim()) return;
@@ -110,49 +114,92 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Chat Section */}
-        <div
-          ref={chatRef}
-          className="bg-red backdrop-blur-md border border-white/10 h-80 rounded-xl p-4 overflow-y-auto space-y-3"
-        >
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`max-w-[75%] px-4 py-2 rounded-lg text-sm ${
-                msg.type === "user"
-                  ? "ml-auto bg-blue-600"
-                  : "mr-auto bg-gray-700 text-gray-100"
-              }`}
-            >
-              {msg.text}
+        {/* Initial State - Centered Input */}
+        {messages.length === 0 && (
+          <div className="flex flex-col  items-center justify-center space-y-4">
+            <div className="flex gap-2 w-full">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask something..."
+                className="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 placeholder:text-gray-400"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={loading || !input.trim()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition"
+              >
+                Send
+              </button>
             </div>
-          ))}
-          {loading && <p className="text-sm text-gray-400">AI is typing...</p>}
-        </div>
+          </div>
+        )}
 
-        {/* Input Section */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask something..."
-            className="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 placeholder:text-gray-400"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition"
-          >
-            Send
-          </button>
-        </div>
+        {/* Chat State - Messages + Bottom Input */}
+        {messages.length > 0 && (
+          <>
+            {/* Chat Section */}
+            <div
+              ref={chatRef}
+              className="bg-white/5 backdrop-blur-md border border-white/10 h-96 rounded-xl overflow-y-auto p-4"
+            >
+              <div className="space-y-3 ">
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`max-w-[75%] px-4 py-2 rounded-lg text-sm ${
+                      msg.type === "user"
+                        ? "ml-auto bg-blue-600"
+                        : "mr-auto bg-gray-700 text-gray-100"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
+                {loading && (
+                  <div className="mr-auto max-w-[75%] px-4 py-2 rounded-lg text-sm bg-gray-700 text-gray-100">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Input Section */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask something..."
+                className="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 placeholder:text-gray-400"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={loading || !input.trim()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition"
+              >
+                Send
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
