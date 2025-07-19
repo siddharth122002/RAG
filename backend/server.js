@@ -58,7 +58,13 @@ const worker = new Worker(
           collectionName: "pdf-collection",
         }
       );
-      fs.unlinkSync(data.path);
+      setTimeout(() => {
+        try {
+          fs.unlinkSync(data.path);
+        } catch (err) {
+          console.error("File deletion error:", err);
+        }
+      }, 5000);
     } catch (err) {
       console.error("❌ PDF load failed:", err);
     }

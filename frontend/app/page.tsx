@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+    setLoading(true);
     const newId = uuidv4();
     localStorage.setItem("uniqueId", newId);
     let id = newId;
@@ -34,6 +35,9 @@ const App: React.FC = () => {
     });
     const response = await res.json();
     setFiles([{ id: Date.now(), name: file.name, file }]);
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
   };
 
   const handleSend = async () => {
@@ -94,7 +98,6 @@ const App: React.FC = () => {
 
         {/* Upload Section */}
         <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl">
-          <label className="block text-sm mb-2 font-medium">Upload a PDF</label>
           <div
             className="w-full border border-dashed border-gray-500 rounded-lg p-6 text-center cursor-pointer hover:bg-white/10 transition"
             onClick={() => fileInputRef.current?.click()}
@@ -113,9 +116,13 @@ const App: React.FC = () => {
             )}
           </div>
         </div>
-
+        {loading && messages.length === 0 && (
+          <div className="text-center text-gray-300 animate-pulse">
+            Uploading and processing PDF...
+          </div>
+        )}
         {/* Initial State - Centered Input */}
-        {messages.length === 0 && (
+        {messages.length === 0 && !loading && (
           <div className="flex flex-col  items-center justify-center space-y-4">
             <div className="flex gap-2 w-full">
               <input
