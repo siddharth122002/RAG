@@ -7,6 +7,10 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import { ChatCohere, Cohere, CohereEmbeddings } from "@langchain/cohere";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import dotenv from "dotenv";
+import { Worker } from "bullmq";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import fs from "fs";
 dotenv.config();
 
 const redisConnection = new IORedis(process.env.UPSTASH, {
@@ -19,7 +23,51 @@ const redisConnection = new IORedis(process.env.UPSTASH, {
 const queue = new Queue("pdfQueue", {
   connection: redisConnection,
 });
+const worker = new Worker(
+  "pdfQueue",
+  async (job) => {
+    try {
+      const data = JSON.parse(job.data);
+      const loader = new PDFLoader(data.path);
+      const docs = await loader.load();
 
+      const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 0,
+      });
+      let texts = await textSplitter.splitDocuments(docs);
+      texts = texts.map((doc) => {
+        doc.metadata.uniqueId = data.uniqueId;
+        return doc;
+      });
+
+      const embeddings = new CohereEmbeddings({
+        model: "embed-english-v3.0",
+        apiKey: process.env.COHERE,
+      });
+      const client = new QdrantClient({
+        url: process.env.QDRANT_URL,
+        apiKey: process.env.QDRANT_KEY,
+      });
+
+      const vectorStore = await QdrantVectorStore.fromDocuments(
+        texts,
+        embeddings,
+        {
+          client,
+          collectionName: "pdf-collection",
+        }
+      );
+      fs.unlinkSync(data.path);
+    } catch (err) {
+      console.error("❌ PDF load failed:", err);
+    }
+  },
+  {
+    concurrency: 100,
+    connection: redisConnection,
+  }
+);
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "dump/");
