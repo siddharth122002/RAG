@@ -29,7 +29,7 @@ const App: React.FC = () => {
     const formData = new FormData();
     formData.append("pdff", file);
     formData.append("uniqueId", id);
-    const res = await fetch("http://localhost:4000/upload", {
+    const res = await fetch("https://rag-h2nv.onrender.com/upload", {
       method: "POST",
       body: formData,
     });
@@ -55,7 +55,7 @@ const App: React.FC = () => {
     setInput("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/chat", {
+      const res = await fetch("https://rag-h2nv.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
