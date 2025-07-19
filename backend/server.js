@@ -28,7 +28,6 @@ const worker = new Worker(
   async (job) => {
     try {
       const data = JSON.parse(job.data);
-      console.log("-------worker", job.data);
       const loader = new PDFLoader(data.path);
       const docs = await loader.load();
 
@@ -62,7 +61,6 @@ const worker = new Worker(
       setTimeout(() => {
         try {
           fs.unlinkSync(data.path);
-          console.log("-------delete", data.path);
         } catch (err) {
           console.error("File deletion error:", err);
         }
@@ -102,10 +100,6 @@ app.post("/upload", upload.single("pdff"), async (req, res) => {
       path: req.file.path,
     })
   );
-  console.log("-------upload", uniqueId);
-  console.log("-------upload", req.file.originalname);
-  console.log("-------upload", req.file.destination);
-  console.log("-------upload", req.file.path);
   res.send({ msg: "oks" });
 });
 
