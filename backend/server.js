@@ -137,7 +137,9 @@ app.post("/chat", async (req, res) => {
     const result = await ret.invoke(message);
 
     if (!result || result.length === 0) {
-      return res.send({ msg: "Your Pdf is missing!!" });
+      return res.send({
+        msg: "Your pdf has images or blurry data or its not a pdf made with proper formatting. Therefore i wont be able to read it.Sorry, try uploading something else.",
+      });
     }
     const chatModel = new ChatCohere({
       apiKey: process.env.COHERE,

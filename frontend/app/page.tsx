@@ -35,9 +35,7 @@ const App: React.FC = () => {
     });
     const response = await res.json();
     setFiles([{ id: Date.now(), name: file.name, file }]);
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+    setLoading(false);
   };
 
   const handleSend = async () => {
@@ -110,7 +108,9 @@ const App: React.FC = () => {
               className="hidden"
             />
             {files.length > 0 ? (
-              <p className="text-sm text-gray-300">📄 {files[0].name}</p>
+              <p className="text-sm text-gray-300 truncate max-w-full overflow-hidden whitespace-nowrap">
+                📄 {files[0].name}
+              </p>
             ) : (
               <p className="text-sm text-gray-400">Click to upload your PDF</p>
             )}
