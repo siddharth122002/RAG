@@ -85,6 +85,10 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl space-y-6">
+        <div className="bg-red-600 text-white text-center py-2 rounded-lg font-semibold">
+          🚫 Currently not working: Free tier backend limit exceeded. Please try
+          again later.
+        </div>
         <h1 className="text-3xl font-bold text-center">
           🧠 Chat with Your PDF
         </h1>
